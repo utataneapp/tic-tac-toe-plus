@@ -1,9 +1,14 @@
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 
-export const Square = () => {
+type Props = {
+  value: "x" | "〇" | number;
+  onPress: () => void;
+};
+export const Square = (props: Props) => {
+  const { value, onPress } = props;
   return (
-    <TouchableOpacity style={styles.container}>
-      <Text style={styles.text}>×</Text>
+    <TouchableOpacity style={styles.container} onPress={onPress}>
+      <Text style={styles.text}>{value}</Text>
     </TouchableOpacity>
   );
 };
