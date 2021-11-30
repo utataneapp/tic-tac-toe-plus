@@ -1,7 +1,7 @@
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 
 type Props = {
-  value: "x" | "〇" | number;
+  value: "X" | "〇" | number;
   onPress: () => void;
 };
 export const Square = (props: Props) => {

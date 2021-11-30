@@ -1,18 +1,25 @@
+import { prependListener } from "process";
 import React, { useEffect } from "react";
 import { View, StyleSheet, Text } from "react-native";
 import { Square } from "./Square";
+import { Squares } from "./types/Types";
 
 export const Board = () => {
-  const status = "Next Player X";
-  let initialSquares: Array<"x" | "〇" | number> = Array(9).fill("");
+  let initialSquares: Squares = {
+    values: Array(9).fill(0),
+    turn: true,
+  };
+
   const [squares, setSquares] = React.useState(initialSquares);
   const [cnt, setCnt] = React.useState(0);
+
+  const status = "Next Player: " + (squares.turn ? "A" : "B");
 
   useEffect(() => {
     let tentativeNum;
     const tentativeArray: number[] = [];
     let count: { [key: number]: number } = {};
-    for (let i = 0; i < initialSquares.length; i++) {
+    for (let i = 0; i < initialSquares.values.length; i++) {
       while (true) {
         tentativeNum = Math.floor(Math.random() * 3 + 1);
         if (count[tentativeNum] !== 3) {
@@ -23,18 +30,21 @@ export const Board = () => {
         }
       }
     }
-    setSquares(tentativeArray);
+    setSquares((pre) => ({ ...pre, values: tentativeArray }));
   }, []);
 
   const handlePress = (i: number) => {
-    setCnt((pre) => pre + +squares[i]);
-    const newSquares = squares.slice();
-    newSquares[i] = "x";
-    setSquares(newSquares);
+    setCnt((pre) => pre + +squares.values[i]);
+    const newSquares = squares.values.slice();
+    newSquares[i] = squares.turn ? "〇" : "X";
+    setSquares({
+      values: newSquares,
+      turn: !squares.turn,
+    });
   };
 
   const renderSquare = (i: number) => {
-    return <Square value={squares[i]} onPress={() => handlePress(i)} />;
+    return <Square value={squares.values[i]} onPress={() => handlePress(i)} />;
   };
 
   return (
