@@ -1,3 +1,4 @@
+import { fireEvent } from "@testing-library/dom";
 import { prependListener } from "process";
 import React, { useEffect } from "react";
 import { View, StyleSheet, Text } from "react-native";
@@ -11,9 +12,13 @@ export const Board = () => {
   };
 
   const [squares, setSquares] = React.useState(initialSquares);
-  const [cnt, setCnt] = React.useState(0);
+  const [preCnt, setPreCnt] = React.useState(0);
+  const [secCnt, setSecCnt] = React.useState(3);
 
-  const status = "Next Player: " + (squares.turn ? "A" : "B");
+  const winner = calculateWinner(squares);
+  const status = winner
+    ? "Winner: " + winner
+    : "Next Player: " + (squares.turn ? "〇" : "X");
 
   useEffect(() => {
     let tentativeNum;
@@ -34,23 +39,62 @@ export const Board = () => {
   }, []);
 
   const handlePress = (i: number) => {
-    setCnt((pre) => pre + +squares.values[i]);
-    const newSquares = squares.values.slice();
-    newSquares[i] = squares.turn ? "〇" : "X";
-    setSquares({
-      values: newSquares,
-      turn: !squares.turn,
-    });
+    if (
+      calculateWinner(squares) ||
+      squares.values[i] === 1 ||
+      squares.values[i] === 2 ||
+      squares.values[i] === 3
+    ) {
+      const newSquares = squares.values.slice();
+      newSquares[i] = squares.turn ? "〇" : "X";
+      setSquares({
+        values: newSquares,
+        turn: !squares.turn,
+      });
+    }
+    if (squares.turn) {
+      setPreCnt((state) => state + +squares.values[i]);
+    } else {
+      setSecCnt((state) => state + +squares.values[i]);
+    }
   };
 
   const renderSquare = (i: number) => {
     return <Square value={squares.values[i]} onPress={() => handlePress(i)} />;
   };
 
+  function calculateWinner(squares: Squares) {
+    const lines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+    for (let i = 0; i < lines.length; i++) {
+      const [one, two, three] = lines[i];
+      if (
+        squares.values[one] === squares.values[two] &&
+        squares.values[one] === squares.values[three]
+      ) {
+        if (squares.values[one] === "〇" || squares.values[one] === "X") {
+          return squares.values[one];
+        }
+        if (preCnt > secCnt) {
+          return "〇";
+        } else {
+          return "X";
+        }
+      }
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.status}>{status}</Text>
-      <Text style={styles.status}>{cnt}</Text>
       <View style={styles.rowContainer}>
         {renderSquare(0)}
         {renderSquare(1)}
@@ -66,6 +110,8 @@ export const Board = () => {
         {renderSquare(7)}
         {renderSquare(8)}
       </View>
+      <Text style={styles.status}>〇:{preCnt}</Text>
+      <Text style={styles.status}>X:{secCnt}</Text>
     </View>
   );
 };
