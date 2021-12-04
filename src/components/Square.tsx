@@ -10,7 +10,7 @@ export const Square = (props: Props) => {
   return (
     <Button
       mode="contained"
-      color="#5b5bff"
+      color="#5b5f10"
       style={styles.container}
       onPress={onPress}
     >

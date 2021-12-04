@@ -2,6 +2,11 @@ import { fireEvent } from "@testing-library/dom";
 import { prependListener } from "process";
 import React, { useEffect } from "react";
 import { View, StyleSheet, Text } from "react-native";
+import { Button } from "react-native-paper";
+import {
+  flattenDiagnosticMessageText,
+  reduceEachLeadingCommentRange,
+} from "typescript";
 import { Square } from "./Square";
 import { Squares } from "./types/Types";
 
@@ -12,7 +17,7 @@ export const Board = () => {
   };
 
   const [squares, setSquares] = React.useState(initialSquares);
-  let cnt = 0;
+  const [resetNumber, setResetNumber] = React.useState(false);
   const [preCnt, setPreCnt] = React.useState(0);
   const [secCnt, setSecCnt] = React.useState(3);
 
@@ -37,15 +42,10 @@ export const Board = () => {
       }
     }
     setSquares((pre) => ({ ...pre, values: tentativeArray }));
-  }, []);
+  }, [resetNumber]);
 
   const handlePress = (i: number) => {
-    if (
-      calculateWinner(squares) ||
-      squares.values[i] === 1 ||
-      squares.values[i] === 2 ||
-      squares.values[i] === 3
-    ) {
+    if (calculateWinner(squares) || typeof squares.values[i] == "number") {
       const newSquares = squares.values.slice();
       newSquares[i] = squares.turn ? "〇" : "✖";
       setSquares({
@@ -53,15 +53,32 @@ export const Board = () => {
         turn: !squares.turn,
       });
     }
-    if (squares.turn) {
-      setPreCnt((state) => state + +squares.values[i]);
-    } else {
-      setSecCnt((state) => state + +squares.values[i]);
+    if (typeof squares.values[i] == "number") {
+      if (squares.turn) {
+        setPreCnt((state) => state + +squares.values[i]);
+      } else {
+        setSecCnt((state) => state + +squares.values[i]);
+      }
     }
   };
 
   const renderSquare = (i: number) => {
     return <Square value={squares.values[i]} onPress={() => handlePress(i)} />;
+  };
+
+  const resetSquares = React.useCallback(() => setSquares(initialSquares), []);
+  const resetNumbers = () =>
+    setResetNumber((pre) => {
+      return !pre;
+    });
+  const resetCnts = () => {
+    setPreCnt(0);
+    setSecCnt(3);
+  };
+  const combineReset = () => {
+    resetSquares();
+    resetNumbers();
+    resetCnts();
   };
 
   function calculateWinner(squares: Squares) {
@@ -97,7 +114,10 @@ export const Board = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.status}>{status}</Text>
+      <Text style={styles.title}>Tic-Tac-Toe+</Text>
+      <Text style={winner ? [styles.status, { color: "red" }] : styles.status}>
+        {status}
+      </Text>
       <View style={styles.rowContainer}>
         {renderSquare(0)}
         {renderSquare(1)}
@@ -114,9 +134,12 @@ export const Board = () => {
         {renderSquare(8)}
       </View>
       <View style={styles.pointContainer}>
-        <Text style={styles.point}>〇ポイント:{preCnt}</Text>
-        <Text style={styles.point}>✖ポイント:{secCnt}</Text>
+        <Text style={styles.point}>〇Point:{preCnt}</Text>
+        <Text style={styles.point}>✖Point:{secCnt}</Text>
       </View>
+      <Button mode="outlined" color="#000000" onPress={() => combineReset()}>
+        Reset
+      </Button>
     </View>
   );
 };
@@ -125,6 +148,17 @@ const styles = StyleSheet.create({
   container: {
     margin: "auto",
     marginTop: 50,
+    height: "80%",
+  },
+
+  title: {
+    textAlign: "center",
+    fontSize: 36,
+    fontWeight: "bold",
+    marginBottom: 15,
+    borderWidth: 1,
+    borderRadius: 10,
+    color: "#5b5f10",
   },
 
   status: {
@@ -144,5 +178,9 @@ const styles = StyleSheet.create({
 
   pointContainer: {
     marginTop: 10,
+    marginHorizontal: 20,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
 });
