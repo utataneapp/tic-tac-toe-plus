@@ -12,13 +12,14 @@ export const Board = () => {
   };
 
   const [squares, setSquares] = React.useState(initialSquares);
+  let cnt = 0;
   const [preCnt, setPreCnt] = React.useState(0);
   const [secCnt, setSecCnt] = React.useState(3);
 
   const winner = calculateWinner(squares);
   const status = winner
     ? "Winner: " + winner
-    : "Next Player: " + (squares.turn ? "〇" : "X");
+    : "Next Player: " + (squares.turn ? "〇" : "✖");
 
   useEffect(() => {
     let tentativeNum;
@@ -46,7 +47,7 @@ export const Board = () => {
       squares.values[i] === 3
     ) {
       const newSquares = squares.values.slice();
-      newSquares[i] = squares.turn ? "〇" : "X";
+      newSquares[i] = squares.turn ? "〇" : "✖";
       setSquares({
         values: newSquares,
         turn: !squares.turn,
@@ -80,16 +81,18 @@ export const Board = () => {
         squares.values[one] === squares.values[two] &&
         squares.values[one] === squares.values[three]
       ) {
-        if (squares.values[one] === "〇" || squares.values[one] === "X") {
+        if (squares.values[one] === "〇" || squares.values[one] === "✖") {
           return squares.values[one];
-        }
-        if (preCnt > secCnt) {
-          return "〇";
-        } else {
-          return "X";
         }
       }
     }
+    if (squares.values.every((value) => typeof value == "string")) {
+      if (preCnt > secCnt) {
+        return "〇";
+      }
+      return "✖";
+    }
+    return null;
   }
 
   return (
@@ -110,8 +113,10 @@ export const Board = () => {
         {renderSquare(7)}
         {renderSquare(8)}
       </View>
-      <Text style={styles.status}>〇:{preCnt}</Text>
-      <Text style={styles.status}>X:{secCnt}</Text>
+      <View style={styles.pointContainer}>
+        <Text style={styles.point}>〇ポイント:{preCnt}</Text>
+        <Text style={styles.point}>✖ポイント:{secCnt}</Text>
+      </View>
     </View>
   );
 };
@@ -124,9 +129,20 @@ const styles = StyleSheet.create({
 
   status: {
     textAlign: "center",
-    fontSize: 20,
+    fontSize: 30,
+    fontWeight: "bold",
   },
+
+  point: {
+    textAlign: "center",
+    fontSize: 25,
+  },
+
   rowContainer: {
     flexDirection: "row",
+  },
+
+  pointContainer: {
+    marginTop: 10,
   },
 });

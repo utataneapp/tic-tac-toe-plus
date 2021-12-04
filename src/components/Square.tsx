@@ -1,15 +1,21 @@
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
+import { Button } from "react-native-paper";
 
 type Props = {
-  value: "X" | "〇" | number;
+  value: "✖" | "〇" | number;
   onPress: () => void;
 };
 export const Square = (props: Props) => {
   const { value, onPress } = props;
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <Button
+      mode="contained"
+      color="#5b5bff"
+      style={styles.container}
+      onPress={onPress}
+    >
       <Text style={styles.text}>{value}</Text>
-    </TouchableOpacity>
+    </Button>
   );
 };
 
